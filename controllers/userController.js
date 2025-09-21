@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
+const generateToken = require('../utils/generateToken');
 
 const registerUser = async (req, res) => {
     const { name, email, password, role, number } = req.body;
@@ -25,7 +26,8 @@ const registerUser = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
-            number: user.numer
+            number: user.number,
+            token: generateToken(user._id),
         });
     } else {
         res.status(400).json({message: 'invalid user data'});
@@ -44,7 +46,8 @@ const loginUser = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
-            number: user.number
+            number: user.number,
+            token: generateToken(user._id),
         });
     }else {
         return res.status(400).json({message: 'Invalid email or password'});
