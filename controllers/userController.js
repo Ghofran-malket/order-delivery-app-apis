@@ -55,4 +55,16 @@ const loginUser = async (req, res) => {
     
 }
 
-module.exports = { registerUser, loginUser};
+function generateInviteCode(userId) {
+  return `INVITE-${userId}-${Date.now()}`;
+}
+
+const inviteFriend = async (req, res)=> {
+    const userId = req.params.userId;
+    const code = generateInviteCode(userId);
+
+    const inviteLink = `https://algenie.com/invite?code=${code}`;
+    res.json({ inviteLink });
+}
+
+module.exports = { registerUser, loginUser, inviteFriend};
