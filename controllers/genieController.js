@@ -31,5 +31,18 @@ const goOnline = async (req, res) => {
     
 }
 
+const goOffline = async (req, res) => {
+    try {
+      const onlineGenie = await OnlineGenie.findById(req.params.userId);
+      if (!onlineGenie) return res.status(404).json({ message: 'onlineGenie not found' });
 
-module.exports = { goOnline };
+      await onlineGenie.deleteOne();
+      res.json({ message: 'onlineGenie deleted' });
+    } catch (error) {
+      res.status(400).json({ message: 'Invalid onlineGenie ID' });
+    }
+
+}
+
+
+module.exports = { goOnline, goOffline };
