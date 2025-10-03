@@ -10,6 +10,7 @@ app.use(cors());
 connectDB();
 
 const userRoutes = require('./routes/userRoutes');
+const genieRoutes = require('./routes/genieRoutes');
 
 app.use(express.json()); // To parse JSON bodies
 
@@ -20,5 +21,5 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
-
+app.use('/api/genie', genieRoutes);
 app.listen(PORT, () => console.log(`Server running on port http://0.0.0.0:3000`));
