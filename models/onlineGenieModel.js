@@ -29,11 +29,17 @@ const onlineGenieSchema = new mongoose.Schema({
     lastSeen: {
         type: Date,
         default: Date.now
+    },
+    coordinates: {
+        latitude: {
+            type: Number,
+            required: true
+        },
+        longitude: {
+            type: Number,
+            required: true
+        }
     }
-    // coordinates: {
-    //     type: String,
-    //     required: [true]
-    // },
     
 });
 

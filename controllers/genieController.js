@@ -7,11 +7,15 @@ const goOnline = async (req, res) => {
     const onlineGenie = await OnlineGenie.create({
         _id: userId,
         token: token,
-        onlineSince: new Date(),
+        onlineSince: Date.now(),
         isBusy: false,
         BusyWith: "",
         BusySince: "",
-        lastSeen: new Date()
+        lastSeen: Date.now(),
+        coordinates: {
+            latitude: latitude,
+            longitude: longitude
+        }
 
     });
 
@@ -23,7 +27,8 @@ const goOnline = async (req, res) => {
             isBusy: onlineGenie.isBusy,
             BusyWith: onlineGenie.BusyWith,
             BusySince: onlineGenie.BusySince,
-            lastSeen: onlineGenie.lastSeen
+            lastSeen: onlineGenie.lastSeen,
+            position: onlineGenie.position
         });
     } else {
         res.status(400).json({message: 'invalid online genie data'});
