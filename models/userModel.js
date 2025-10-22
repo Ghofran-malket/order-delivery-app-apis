@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please enter your number']
     },
+    imagePath: {
+        type: String,
+        required: true
+    },
+    
 });
 
 const User = mongoose.model('User', userSchema);
