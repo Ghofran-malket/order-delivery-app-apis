@@ -90,4 +90,17 @@ const updateStoreStatus = async (req, res) => {
     }
 }
 
-module.exports = { getTakenOrdersByGenie, createOrder, updateStoreStatus};
+const getOrderById = async (req, res) => {
+    try {
+        const { orderId } = req.query;
+        if(orderId == null){
+            res.status(500).json({ error: 'the order id is null' });
+        }
+        const order = await Order.findOne({orderId: orderId});
+        res.status(200).json(order);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch the order' });
+    }
+}
+
+module.exports = { getTakenOrdersByGenie, createOrder, updateStoreStatus, getOrderById};
