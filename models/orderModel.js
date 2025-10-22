@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const storeSchema = require('./storeModel');
 
 const orderSchema = new mongoose.Schema({
     orderId: {
@@ -20,6 +21,7 @@ const orderSchema = new mongoose.Schema({
         default: 'unpublished',
         required: [true, 'Please enter your role']
     },
+    stores: [storeSchema],
     createdAt: {
         type: Date,
         default: Date.now
@@ -36,8 +38,19 @@ const orderSchema = new mongoose.Schema({
     },
     updatedAt: {
         type: Date
+    },
+    chargeService: {
+        type: String,
+        required: true
+    },
+    note: {
+        type: String,
+        required: true
+    },
+    receiptValue: {
+        type: String,
+        required: true
     }
-    
 });
 
 const Order = mongoose.model('Order', orderSchema);
