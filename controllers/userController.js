@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const generateToken = require('../utils/generateToken');
 
 const registerUser = async (req, res) => {
-    const { name, email, password, role, number } = req.body;
+    const { name, email, password, role, number, imagePath, city, country, languages, bio } = req.body;
 
     //check if user exist
     const userExist = await User.findOne({ email });
@@ -17,7 +17,12 @@ const registerUser = async (req, res) => {
         email: email,
         password: hashedpassword,
         role: role,
-        number: number
+        number: number,
+        imagePath: imagePath,
+        city: city,
+        country: country,
+        languages: languages,
+        bio: bio
     });
 
     if(user){
@@ -28,6 +33,11 @@ const registerUser = async (req, res) => {
             role: user.role,
             number: user.number,
             token: generateToken(user._id),
+            imagePath: imagePath,
+            city: city,
+            country: country,
+            languages: languages,
+            bio: bio
         });
     } else {
         res.status(400).json({message: 'invalid user data'});
