@@ -29,6 +29,29 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    city: {
+        type: String,
+        required: true
+    },
+    country: {
+        type: String,
+        required: true
+    },
+    languages: [String],
+    likeCount: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    disLikeCount: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    bio: {
+        type: String,
+        required: true
+    },
     
 });
 
