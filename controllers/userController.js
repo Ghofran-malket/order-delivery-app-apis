@@ -77,4 +77,34 @@ const inviteFriend = async (req, res)=> {
     res.json({ inviteLink });
 }
 
-module.exports = { registerUser, loginUser, inviteFriend};
+const getUserInfo = async (req, res) => {
+    try {
+        const { userId } = req.query;
+        if(userId == null){
+            res.status(500).json({ error: 'the user id is null' });
+        }
+        const user = await User.findOne({_id: userId});
+        res.status(200).json(user);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch users info ' });
+    }
+}
+
+const giveRating = async (req, res) => {
+    try {
+        const { customerId, rating } = req.query;
+        if(customerId == null || rating == null){
+            res.status(500).json({ error: 'Failed to fetch the order either the customerId or the rating is wrong' });
+        }
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: customerId },
+            rating > 0 ? { $inc: { likeCount: rating } } : { $inc: { disLikeCount: rating } },
+            { new: true } 
+        );
+        res.status(200).json(updatedUser);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update the rating value' });
+    }
+}
+
+module.exports = { registerUser, loginUser, inviteFriend, getUserInfo, giveRating};
