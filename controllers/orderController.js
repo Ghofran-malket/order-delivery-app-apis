@@ -120,4 +120,21 @@ const updateOrder = async (req, res) => {
     }
 }
 
-module.exports = { getTakenOrdersByGenie, createOrder, updateStoreStatus, getOrderById, updateOrder};
+const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderStatus, orderId } = req.query;
+        if(orderId == null || orderStatus == null){
+            res.status(500).json({ error: 'Failed to fetch the order either the orderId or the orderStatus is wrong' });
+        }
+        const updatedOrder = await Order.findOneAndUpdate(
+            { orderId: orderId },
+            {$set: {"orderStatus": orderStatus}},
+            { new: true } 
+        );
+        res.status(200).json(updatedOrder);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update the orderStatus' });
+    }
+}
+
+module.exports = { getTakenOrdersByGenie, createOrder, updateStoreStatus, getOrderById, updateOrder, updateOrderStatus};
