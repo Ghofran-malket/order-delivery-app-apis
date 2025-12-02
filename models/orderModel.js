@@ -50,7 +50,12 @@ const orderSchema = new mongoose.Schema({
     receiptValue: {
         type: String,
         required: true
-    }
+    },
+    genieProgress: {
+        step: { type: String, default: "genieHome" }, // current screen
+        storeIndex: { type: Number, default: 0 },
+        lastUpdated: { type: Date, default: Date.now },
+    },
 });
 
 const Order = mongoose.model('Order', orderSchema);
