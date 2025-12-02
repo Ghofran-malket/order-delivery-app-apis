@@ -1,9 +1,11 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const generateToken = require('../utils/generateToken');
+const admin = require("../config/firebase");
+const Order = require('../models/orderModel');
 
 const registerUser = async (req, res) => {
-    const { name, email, password, role, number, imagePath, city, country, languages, bio } = req.body;
+    const { name, email, password, role, number, imagePath, city, country, languages, bio, token } = req.body;
 
     //check if user exist
     const userExist = await User.findOne({ email });
@@ -22,7 +24,8 @@ const registerUser = async (req, res) => {
         city: city,
         country: country,
         languages: languages,
-        bio: bio
+        bio: bio,
+        token: token
     });
 
     if(user){
@@ -37,7 +40,8 @@ const registerUser = async (req, res) => {
             city: city,
             country: country,
             languages: languages,
-            bio: bio
+            bio: bio, 
+            token: token
         });
     } else {
         res.status(400).json({message: 'invalid user data'});
@@ -45,9 +49,8 @@ const registerUser = async (req, res) => {
 
 }
 
-
 const loginUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, token } = req.body;
 
     const user = await User.findOne({ email });
     if ( user && bcrypt.compare(password, user.password)) {
@@ -57,7 +60,7 @@ const loginUser = async (req, res) => {
             email: user.email,
             role: user.role,
             number: user.number,
-            token: generateToken(user._id),
+            token: token
         });
     }else {
         return res.status(400).json({message: 'Invalid email or password'});
@@ -107,4 +110,48 @@ const giveRating = async (req, res) => {
     }
 }
 
-module.exports = { registerUser, loginUser, inviteFriend, getUserInfo, giveRating};
+const sendNotification = async (req, res) => {
+    try {
+        const userId = req.body.userId;
+        const orderId = req.body.orderId;
+        const user = await User.findOne({_id: userId});
+        const order = await Order.findOne({orderId: orderId});
+        if (!user.token || !order) {
+            return res.status(400).json({ error: "User has no FCM token" });
+        }
+        
+        const message = {
+            notification: {
+                title: "New Message",
+                body: "You received a message!",
+            },
+            token: user.token,
+            data: {
+                orderId: order.orderId,
+                genieId: order.genieId,
+                customerId: order.customerId,
+                orderStatus: order.orderStatus,
+                stores: JSON.stringify(order.stores),
+                createdAt: String(order.createdAt),
+                orderLocationLatitude: String(order.orderLocation.latitude),
+                orderLocationLongitude: String(order.orderLocation.longitude),
+                updatedAt: String(order.updatedAt),
+                chargeService: order.chargeService,
+                note: order.note,
+                receiptValue: order.receiptValue,
+                genieProgressStoreIndex: String(order.genieProgress.storeIndex),
+                genieProgressStep: String(order.genieProgress.step),
+                genieProgressLastUpdated: String(order.genieProgress.lastUpdated)
+            }
+        };
+
+        const response = await admin.messaging().send(message);
+        console.log("Notification sent:", response);
+        res.json({ success: true, message: message });
+    } catch (error) {
+        console.error("Error sending notification:", error);
+        res.json({ success: false });
+    }
+}
+
+module.exports = { registerUser, loginUser, inviteFriend, getUserInfo, giveRating, sendNotification};
