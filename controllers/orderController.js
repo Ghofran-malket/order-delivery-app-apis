@@ -7,7 +7,12 @@ const getTakenOrdersByGenie = async (req, res) => {
             res.status(500).json({ error: 'Failed to fetch genieId' });
         }
         const orders = await Order.find({genieId: genieId, orderStatus: 'taken'}).sort({ createdAt: -1 }); // latest first
-        res.status(200).json(orders);
+        
+        //if (!orders) return res.json({ active: false });
+        res.status(200).json({
+            active: true,
+            orders: orders,
+        });
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch orders' });
     }
@@ -54,7 +59,12 @@ const createOrder = async (req, res) => {
         updatedAt: Date.now(),
         chargeService: '50',
         note: 'Note',
-        receiptValue: '0'
+        receiptValue: '0',
+        genieProgress: {
+            step: "genieHome" , // current screen
+            storeIndex: 0,
+            lastUpdated: Date.now(),
+        },
     });
 
     if(order){
@@ -64,9 +74,14 @@ const createOrder = async (req, res) => {
             orderStatus: order.orderStatus,
             createdAt: order.createdAt,
             stores: [
-                order.stores.every,
+                order.stores,
                 order.stores[0]._id
-            ]
+            ],
+            genieProgress: {
+                step: order.genieProgress.step, // current screen
+                storeIndex: order.genieProgress.storeIndex,
+                lastUpdated: order.genieProgress.lastUpdated,
+            },
         });
     } else {
         res.status(400).json({message: 'invalid order data'});
@@ -137,4 +152,81 @@ const updateOrderStatus = async (req, res) => {
     }
 }
 
-module.exports = { getTakenOrdersByGenie, createOrder, updateStoreStatus, getOrderById, updateOrder, updateOrderStatus};
+const updateGenieProgress = async (req, res) => {
+  const { orderId } = req.query;
+  const { step, storeIndex } = req.body;
+
+  try {
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        $set: {
+          "genieProgress.step": step,
+          "genieProgress.storeIndex": storeIndex,
+          "genieProgress.lastUpdated": new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    res.json({
+      success: true,
+      progress: order.genieProgress,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get Genie’s current active order
+const getGenieCurrentOrder = async (req, res) => {
+  const { genieId } = req.query;
+
+  try {
+    const order = await Order.findOne({
+      genieId,
+      orderStatus: "taken", // active order
+    });
+
+    if (!order) return res.json({ active: false });
+
+    res.status(200).json({
+      active: true,
+      order: order
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Reset progress when order complete
+const completeOrder = async (req, res) => {
+  const { orderId } = req.query;
+
+  try {
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        $set: {
+          orderStatus: "delivered",
+          "genieProgress.step": "genieHome",
+          "genieProgress.storeIndex": 0,
+          "genieProgress.lastUpdated": new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    res.json({ success: true, order });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+module.exports = { getTakenOrdersByGenie, createOrder, updateStoreStatus, getOrderById, updateOrder, 
+    updateOrderStatus, updateGenieProgress, getGenieCurrentOrder, completeOrder};
