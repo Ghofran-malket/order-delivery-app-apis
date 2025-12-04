@@ -2,22 +2,24 @@ const OnlineGenie = require('../models/onlineGenieModel.js');
 
 const goOnline = async (req, res) => {
     const { userId, token, latitude, longitude } = req.body;
+    const onlineGenie = await OnlineGenie.findOne({_id: userId});
+    if(!onlineGenie){
+        //create a doc in online genie collection
+        onlineGenie = await OnlineGenie.create({
+            _id: userId,
+            token: token,
+            onlineSince: Date.now(),
+            isBusy: false,
+            BusyWith: "",
+            BusySince: "",
+            lastSeen: Date.now(),
+            coordinates: {
+                latitude: latitude,
+                longitude: longitude
+            }
 
-    //create a doc in online genie collection
-    const onlineGenie = await OnlineGenie.create({
-        _id: userId,
-        token: token,
-        onlineSince: Date.now(),
-        isBusy: false,
-        BusyWith: "",
-        BusySince: "",
-        lastSeen: Date.now(),
-        coordinates: {
-            latitude: latitude,
-            longitude: longitude
-        }
-
-    });
+        });
+    }
 
     if(onlineGenie){
         res.status(201).json({
@@ -49,5 +51,14 @@ const goOffline = async (req, res) => {
 
 }
 
+const isGenieOnline = async (req, res) => {
+    const userId = req.params.userId;
+    const onlineGenie = await OnlineGenie.findOne({_id: userId});
+    if(!onlineGenie){
+        res.status(200).json({isOnline: false, message: 'the genie is not online'});
+    }
+    res.status(200).json({isOnline: true, message: 'the genie is online'});    
+}
 
-module.exports = { goOnline, goOffline };
+
+module.exports = { goOnline, goOffline, isGenieOnline };
