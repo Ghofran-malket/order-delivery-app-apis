@@ -1,5 +1,6 @@
 const OnlineGenie = require('../models/onlineGenieModel.js');
 const Order = require('../models/orderModel.js');
+const RejectedOrder = require('../models/rejectedOrderModel.js');
 
 const goOnline = async (req, res) => {
     const { userId, token, latitude, longitude } = req.body;
@@ -82,4 +83,29 @@ const acceptOrder = async (req, res) => {
         res.status(500).json({ error: 'failed to acceptOrder' }); 
     }   
 }
-module.exports = { goOnline, goOffline, isGenieOnline, acceptOrder };
+
+const rejectOrder = async (req, res) => {
+    try {
+        const { userId, orderId } = req.body;
+        if(orderId == null || userId == null){
+            res.status(500).json({ error: 'either the orderId or the userId is wrong' });
+        }
+        const rejectedOrder = await RejectedOrder.create({
+            _id: orderId,
+            listOfGeniesId: [
+                {
+                genieId: userId,       // the genie ID
+                createdAt: Date.now()  // optional, schema already sets default
+                }
+            ]
+        });
+        if(rejectedOrder){
+            res.status(201).json({message: 'the rejected order doc has been created'}); 
+        }
+        
+    } catch (error) {
+        res.status(500).json({ error: 'failed to rejectOrder' }); 
+    }   
+}
+
+module.exports = { goOnline, goOffline, isGenieOnline, acceptOrder, rejectOrder };
