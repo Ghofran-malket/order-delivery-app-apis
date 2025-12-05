@@ -1,4 +1,5 @@
 const OnlineGenie = require('../models/onlineGenieModel.js');
+const Order = require('../models/orderModel.js');
 
 const goOnline = async (req, res) => {
     const { userId, token, latitude, longitude } = req.body;
@@ -60,5 +61,25 @@ const isGenieOnline = async (req, res) => {
     res.status(200).json({isOnline: true, message: 'the genie is online'});    
 }
 
-
-module.exports = { goOnline, goOffline, isGenieOnline };
+const acceptOrder = async (req, res) => {
+    try {
+        const { userId, orderId } = req.body;
+        if(orderId == null || userId == null){
+            res.status(500).json({ error: 'either the orderId or the userId is wrong' });
+        }
+        await OnlineGenie.updateOne(
+            {_id: userId},
+            {$set: {"isBusy": true, "BusyWith": orderId, "BusySince": Date.now()}},
+            { new: true }
+        );
+        await Order.updateOne(
+            {orderId: orderId},
+            {$set: {"genieId": userId, "orderStatus": "taken", "genieProgress.step": "genieHome", "updatedAt": Date.now()}},
+            { new: true }
+        );
+        res.status(200).json({message: 'the genie accept the order'}); 
+    } catch (error) {
+        res.status(500).json({ error: 'failed to acceptOrder' }); 
+    }   
+}
+module.exports = { goOnline, goOffline, isGenieOnline, acceptOrder };
