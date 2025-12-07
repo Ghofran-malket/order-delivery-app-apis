@@ -90,21 +90,18 @@ const rejectOrder = async (req, res) => {
         if(orderId == null || userId == null){
             res.status(500).json({ error: 'either the orderId or the userId is wrong' });
         }
-        const rejectedOrder = await RejectedOrder.create({
-            _id: orderId,
-            listOfGeniesId: [
-                {
-                genieId: userId,       // the genie ID
-                createdAt: Date.now()  // optional, schema already sets default
-                }
-            ]
-        });
+        const rejectedOrder = await RejectedOrder.updateOne(
+            { _id: orderId },
+            { $push: { listOfGeniesId: { genieId: userId, createdAt: Date.now() }} },
+            { upsert: true }
+            
+        );
         if(rejectedOrder){
             res.status(201).json({message: 'the rejected order doc has been created'}); 
         }
         
     } catch (error) {
-        res.status(500).json({ error: 'failed to rejectOrder' }); 
+        res.status(500).json({ error: 'failed to rejectOrder' + error }); 
     }   
 }
 
