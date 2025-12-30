@@ -4,7 +4,7 @@ const RejectedOrder = require('../models/rejectedOrderModel.js');
 
 const goOnline = async (req, res) => {
     const { userId, token, latitude, longitude } = req.body;
-    const onlineGenie = await OnlineGenie.findOne({_id: userId});
+    let onlineGenie = await OnlineGenie.findOne({_id: userId});
     if(!onlineGenie){
         //create a doc in online genie collection
         onlineGenie = await OnlineGenie.create({
