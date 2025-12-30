@@ -30,7 +30,7 @@ const registerUser = async (req, res) => {
 
     if(user){
         res.status(201).json({
-            id: user._id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
@@ -55,7 +55,7 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if ( user && bcrypt.compare(password, user.password)) {
         res.json({
-            id: user._id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
@@ -126,7 +126,7 @@ const sendNotification = async (req, res) => {
                 body: "You received a message!",
             },
             token: user.token,
-            data: {
+            data: stringifyData({
                 orderId: order.orderId,
                 genieId: order.genieId,
                 customerId: order.customerId,
@@ -142,7 +142,7 @@ const sendNotification = async (req, res) => {
                 genieProgressStoreIndex: String(order.genieProgress.storeIndex),
                 genieProgressStep: String(order.genieProgress.step),
                 genieProgressLastUpdated: String(order.genieProgress.lastUpdated)
-            }
+            })
         };
 
         const response = await admin.messaging().send(message);
@@ -152,6 +152,14 @@ const sendNotification = async (req, res) => {
         console.error("Error sending notification:", error);
         res.json({ success: false });
     }
+}
+
+function stringifyData(obj) {
+  const result = {};
+  for (const key in obj) {
+    result[key] = obj[key] != null ? String(obj[key]) : "";
+  }
+  return result;
 }
 
 module.exports = { registerUser, loginUser, inviteFriend, getUserInfo, giveRating, sendNotification};
