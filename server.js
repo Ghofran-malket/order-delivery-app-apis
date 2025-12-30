@@ -3,16 +3,24 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const http = require("http");
+const socketHandler = require("./socket/socketHandler");
 
 dotenv.config();
 const app = express();
+const server = http.createServer(app);
 app.use(cors());
+const io = require("socket.io")(server, {
+  cors: { origin: "*" }
+});
+socketHandler(io);
 connectDB();
 
 const userRoutes = require('./routes/userRoutes');
 const genieRoutes = require('./routes/genieRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 app.use(express.json()); // To parse JSON bodies
 
@@ -26,4 +34,5 @@ app.use('/api/users', userRoutes);
 app.use('/api/genie', genieRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reports', reportRoutes);
-app.listen(PORT, () => console.log(`Server running on port http://0.0.0.0:3000`));
+app.use('/api/chat', chatRoutes);
+server.listen(PORT, () => console.log(`Server running on port http://0.0.0.0:3000`));
