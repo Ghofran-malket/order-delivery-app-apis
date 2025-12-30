@@ -21,6 +21,7 @@ const genieRoutes = require('./routes/genieRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const offerRoutes = require('./routes/offerRoutes');
 
 app.use(express.json()); // To parse JSON bodies
 
@@ -35,4 +36,5 @@ app.use('/api/genie', genieRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/offers', offerRoutes);
 server.listen(PORT, () => console.log(`Server running on port http://0.0.0.0:3000`));
