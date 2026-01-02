@@ -44,4 +44,15 @@ const createOffersList = async (req, res) => {
         res.status(400).json({message: 'Failed'});
     }
 }
-module.exports = { createOffersList }
+
+const getOffersList = async (req, res) => {
+    const offers = await Offer.find();
+    
+    if(offers){
+        res.status(200).json(offers);
+    } else {
+        res.status(400).json({message: 'Failed'});
+    }
+}
+
+module.exports = { createOffersList, getOffersList}
